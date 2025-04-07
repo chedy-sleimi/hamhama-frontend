@@ -1,0 +1,36 @@
+<!-- src/app/user/user-list/user-list.component.html -->
+<h2>Manage Users</h2>
+
+<app-loading-spinner *ngIf="loading"></app-loading-spinner>
+<app-error-message [message]="error"></app-error-message>
+
+<table *ngIf="!loading && users.length > 0" class="user-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let user of users">
+            <td>{{ user.id }}</td>
+            <td>
+                <a [routerLink]="['/users', user.username, 'profile']">{{ user.username }}</a>
+            </td>
+            <td>{{ user.email }}</td>
+            <!-- REMOVE optional chaining '?' if roles is guaranteed to be string[] -->
+            <td>{{ user.roles.join(', ') }}</td>
+            <td>
+                 <button (click)="deleteUser(user.id)" class="delete-button" [disabled]="deletingUserId === user.id">
+                      <span *ngIf="deletingUserId !== user.id">Delete</span>
+                      <span *ngIf="deletingUserId === user.id">...</span>
+                 </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<p *ngIf="!loading && users.length === 0">No users found.</p>

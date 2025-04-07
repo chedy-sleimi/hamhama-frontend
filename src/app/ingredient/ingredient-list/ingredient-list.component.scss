@@ -1,0 +1,72 @@
+/* src/app/ingredient/ingredient-list/ingredient-list.component.scss */
+h2 {
+    margin-bottom: 20px;
+}
+
+.add-ingredient-form {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    margin-bottom: 30px;
+
+     h4 {
+         margin-top: 0;
+         margin-bottom: 15px;
+     }
+
+    .form-group { // Reuse global form styles or define specifics
+        margin-bottom: 15px;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+
+         .cancel-button {
+             background-color: #6c757d;
+              &:hover { background-color: #5a6268; }
+         }
+    }
+}
+
+.ingredient-table { // Reuse user-list table styles or define specifics
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+     td button {
+         margin-right: 8px;
+         padding: 5px 8px;
+         font-size: 0.85em;
+         border-radius: 3px;
+         cursor: pointer;
+         border: none;
+     }
+      .edit-button { background-color: #ffc107; color: #333; &:hover { background-color: #e0a800; } }
+      .delete-button { background-color: #dc3545; color: white; &:hover { background-color: #c82333; } }
+       button:disabled { opacity: 0.7; cursor: not-allowed;}
+}
+
+.alert-success {
+   color: #155724;
+   background-color: #d4edda;
+   border-color: #c3e6cb;
+   padding: .75rem 1.25rem;
+   margin-bottom: 1rem;
+   border: 1px solid transparent;
+   border-radius: .25rem;
+}

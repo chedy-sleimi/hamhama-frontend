@@ -1,0 +1,16 @@
+<!-- src/app/recipe/recipe-card/recipe-card.component.html -->
+<div class="recipe-card" *ngIf="recipe">
+    <a [routerLink]="['/recipes', recipe.id]">
+      <img [src]="getImageUrl(recipe.imageUrl)" alt="{{ recipe.name }}" class="recipe-image">
+      <div class="card-content">
+        <h3>{{ recipe.name }}</h3>
+        <p class="category">{{ recipe.category | titlecase }}</p>
+        <p class="author">By: {{ recipe.authorUsername }}</p>
+        <div class="rating">
+          <!-- Basic star display - could use a library -->
+          <span>Avg Rating: {{ recipe.averageRating | number:'1.1-1' }} / 5</span>
+           <!-- Add actual stars later -->
+        </div>
+      </div>
+    </a>
+  </div>

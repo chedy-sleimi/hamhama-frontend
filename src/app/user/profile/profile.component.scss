@@ -1,0 +1,86 @@
+/* src/app/user/profile/profile.component.scss */
+.profile-container {
+    .profile-header {
+      display: flex;
+      align-items: flex-start; // Align top for info vs actions
+      background-color: #f8f9fa;
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border: 1px solid #eee;
+  
+      .profile-picture {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 25px;
+        border: 3px solid white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+  
+      .profile-info {
+        flex-grow: 1;
+  
+        h2 {
+          margin-top: 0;
+          margin-bottom: 8px;
+        }
+  
+        p {
+          margin: 5px 0;
+          color: #555;
+        }
+         .privacy-status {
+             font-size: 0.9em;
+             color: #6c757d;
+             i { margin-right: 5px; } // Space for icon
+         }
+      }
+  
+      .profile-actions {
+        display: flex;
+        flex-direction: column; // Stack buttons vertically
+        align-items: flex-end; // Align buttons right
+        gap: 10px; // Space between buttons
+  
+  
+        button, a.edit-profile-button {
+          padding: 8px 15px;
+          min-width: 100px; // Ensure buttons have some width
+          text-align: center;
+           border-radius: 4px;
+           cursor: pointer;
+            font-size: 0.9rem;
+        }
+         a.edit-profile-button {
+             background-color: #ffc107;
+             color: #333;
+             border: 1px solid #e0a800;
+             text-decoration: none;
+              &:hover { background-color: #e0a800; }
+         }
+          .block-button { background-color: #dc3545; color: white; border: none; &:hover { background-color: #c82333; }}
+          .unblock-button { background-color: #28a745; color: white; border: none; &:hover { background-color: #218838; }}
+  
+      }
+    }
+  
+     .action-error {
+         margin-top: -15px; // Position error message closer to actions
+         margin-bottom: 20px;
+     }
+  
+  
+    .profile-content {
+      h3 {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+      }
+       // Reuse recipe grid styles, maybe with adjustments
+       .profile-recipe-grid {
+          // Inherits from global or list component style
+       }
+    }
+  }

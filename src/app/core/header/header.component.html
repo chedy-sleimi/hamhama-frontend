@@ -1,0 +1,33 @@
+<!-- src/app/core/header/header.component.html -->
+<header class="main-header">
+    <nav class="container">
+      <a routerLink="/" class="logo">Hamhama</a>
+      <ul class="nav-links">
+        <li><a routerLink="/recipes" routerLinkActive="active">Recipes</a></li>
+  
+        <!-- Authenticated User Links -->
+        <ng-container *ngIf="currentUser$ | async as user">
+           <li><a routerLink="/recipes/new" routerLinkActive="active">New Recipe</a></li>
+           <li><a [routerLink]="['/users', user.username, 'profile']" routerLinkActive="active">My Profile</a></li>
+           <!-- Add more authenticated links -->
+        </ng-container>
+  
+        <!-- Admin Links -->
+        <ng-container *ngIf="(currentUser$ | async) && (isAdmin$ | async)">
+           <li><a routerLink="/users" routerLinkActive="active">Manage Users</a></li>
+           <li><a routerLink="/ingredients" routerLinkActive="active">Manage Ingredients</a></li>
+        </ng-container>
+      </ul>
+  
+      <div class="auth-actions">
+         <ng-container *ngIf="currentUser$ | async as user; else loggedOut">
+             <span>Welcome, {{ user.username }}!</span>
+             <button (click)="logout()">Logout</button>
+         </ng-container>
+         <ng-template #loggedOut>
+             <a routerLink="/auth/login" class="button-link">Login</a>
+             <a routerLink="/auth/register" class="button-link register-link">Register</a>
+         </ng-template>
+      </div>
+    </nav>
+  </header>

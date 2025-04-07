@@ -1,0 +1,25 @@
+<!-- src/app/recipe/rating/rating.component.html -->
+<div class="rating-container">
+    <h5>Rating</h5>
+    <div class="current-rating">
+        Average: {{ currentAverageRating | number:'1.1-1' }} / 5
+        <!-- Add visual stars based on currentAverageRating -->
+    </div>
+  
+    <div *ngIf="isAuthenticated" class="user-rating">
+        <span class="rate-label">Your Rating:</span>
+        <span class="stars">
+            <button *ngFor="let star of [1, 2, 3, 4, 5]"
+                    (click)="rate(star)"
+                    [class.selected]="star <= (userRating || 0)"
+                    [disabled]="submittingRating"
+                    title="Rate {{ star }} star{{ star > 1 ? 's' : '' }}">
+                ★
+            </button>
+        </span>
+        <button class="clear-rating" *ngIf="userRating" (click)="clearRating()" [disabled]="submittingRating">Clear</button>
+        <app-error-message [message]="ratingError" class="rating-error"></app-error-message>
+         <!-- Display loading state? -->
+    </div>
+     <p *ngIf="!isAuthenticated"><a routerLink="/auth/login">Log in</a> to rate.</p>
+  </div>

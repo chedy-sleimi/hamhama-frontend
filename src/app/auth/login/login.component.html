@@ -1,0 +1,29 @@
+<!-- src/app/auth/login/login.component.html -->
+<div class="auth-container">
+    <h2>Login</h2>
+    <app-error-message [message]="error"></app-error-message>
+  
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" formControlName="username" class="form-control" [ngClass]="{ 'is-invalid': submitted && f['username'].errors }" />
+        <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">
+          <div *ngIf="f['username'].errors['required']">Username is required</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f['password'].errors }" />
+        <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+          <div *ngIf="f['password'].errors['required']">Password is required</div>
+        </div>
+      </div>
+      <div class="form-group button-group">
+        <button type="submit" [disabled]="loading" class="btn btn-primary">
+          <app-loading-spinner *ngIf="loading" message=""></app-loading-spinner>
+          <span *ngIf="!loading">Login</span>
+        </button>
+        <a routerLink="/auth/register" class="btn btn-link">Register</a>
+      </div>
+    </form>
+  </div>

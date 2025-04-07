@@ -1,0 +1,37 @@
+<!-- src/app/recipe/comment-section/comment-section.component.html -->
+<div class="comment-section">
+    <h4>Comments ({{ comments.length }})</h4>
+    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+    <app-error-message [message]="error"></app-error-message>
+  
+    <!-- Add Comment Form (only if authenticated) -->
+     <div *ngIf="isAuthenticated" class="comment-form">
+         <textarea [(ngModel)]="newCommentContent" placeholder="Add your comment..." rows="3"></textarea>
+         <button (click)="addComment()" [disabled]="!newCommentContent || submittingComment">
+             {{ submittingComment ? 'Submitting...' : 'Add Comment' }}
+         </button>
+          <app-error-message [message]="submitError"></app-error-message>
+     </div>
+     <p *ngIf="!isAuthenticated"><a routerLink="/auth/login">Log in</a> to add comments.</p>
+  
+  
+    <ul class="comment-list" *ngIf="!loading && comments.length > 0">
+      <li *ngFor="let comment of comments" class="comment-item">
+        <p class="comment-content">{{ comment.content }}</p>
+        <div class="comment-meta">
+          <span class="comment-author">By: {{ comment.username || 'Unknown User' }}</span>
+          <span class="comment-timestamp">{{ comment.timestamp | date:'short' }}</span>
+          <!-- Add delete button if owner or admin -->
+          <button
+              *ngIf="isOwnerOrAdmin(comment.userId)"
+              class="delete-comment-button"
+              (click)="deleteComment(comment.id)"
+              [disabled]="deletingCommentId === comment.id">
+                  <span *ngIf="deletingCommentId !== comment.id">Delete</span>
+                  <span *ngIf="deletingCommentId === comment.id">...</span>
+          </button>
+        </div>
+      </li>
+    </ul>
+    <p *ngIf="!loading && comments.length === 0 && !error">No comments yet.</p>
+  </div>

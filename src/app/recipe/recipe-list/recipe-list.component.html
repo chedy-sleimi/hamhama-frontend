@@ -1,0 +1,25 @@
+<!-- src/app/recipe/recipe-list/recipe-list.component.html -->
+<h2>Recipes</h2>
+
+<!-- Add Search/Filter controls here -->
+<!-- Example:
+<div class="filters">
+  <input type="text" placeholder="Search by name..." #searchInput (keyup.enter)="search(searchInput.value)">
+  <select #categorySelect (change)="filterByCategory(categorySelect.value)">
+      <option value="">All Categories</option>
+      <option *ngFor="let cat of recipeCategories" [value]="cat">{{cat | titlecase}}</option>
+  </select>
+  <button (click)="search(searchInput.value, categorySelect.value)">Search</button>
+</div>
+-->
+
+<app-loading-spinner *ngIf="loading"></app-loading-spinner>
+<app-error-message [message]="error"></app-error-message>
+
+<div *ngIf="!loading && !error" class="recipe-grid">
+  <app-recipe-card *ngFor="let recipe of recipes" [recipe]="recipe"></app-recipe-card>
+</div>
+
+<div *ngIf="!loading && !error && recipes.length === 0">
+  <p>No recipes found.</p>
+</div>

@@ -1,0 +1,71 @@
+/* src/app/recipe/rating/rating.component.scss */
+.rating-container {
+    background-color: #fdfdfd;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 5px;
+  
+    h5 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+    }
+  
+    .current-rating {
+      font-size: 0.95em;
+      margin-bottom: 15px;
+      color: #555;
+    }
+  
+    .user-rating {
+        display: flex;
+        align-items: center;
+        gap: 10px; // Space between elements
+  
+        .rate-label {
+             font-size: 0.9em;
+             color: #333;
+        }
+  
+        .stars button {
+            background: none;
+            border: none;
+            font-size: 1.8em; // Larger stars
+            cursor: pointer;
+            color: #ccc; // Default star color
+            padding: 0 2px;
+            transition: color 0.2s ease-in-out;
+  
+            &.selected, &:hover {
+                color: #f5a623; // Gold for selected/hover
+            }
+             &:disabled {
+                  cursor: not-allowed;
+                   color: #e0e0e0;
+              }
+        }
+  
+         .clear-rating {
+             background: none;
+             border: 1px solid #ccc;
+             color: #555;
+             font-size: 0.8em;
+             padding: 3px 8px;
+             border-radius: 3px;
+             cursor: pointer;
+              &:hover {
+                  background-color: #eee;
+              }
+               &:disabled {
+                   opacity: 0.6;
+                   cursor: not-allowed;
+              }
+         }
+  
+        .rating-error {
+            margin-left: 15px; // Space before error
+             // Reduce bottom margin from app-error-message default if needed
+             margin-bottom: 0;
+        }
+    }
+  }

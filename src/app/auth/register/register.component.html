@@ -1,0 +1,47 @@
+<!-- src/app/auth/register/register.component.html -->
+<div class="auth-container">
+    <h2>Register</h2>
+    <app-error-message [message]="error"></app-error-message>
+    <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  
+  
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" formControlName="username" [ngClass]="{ 'is-invalid': submitted && f['username'].errors }" />
+        <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">
+          <div *ngIf="f['username'].errors['required']">Username is required</div>
+          <div *ngIf="f['username'].errors['minlength']">Username must be at least 3 characters</div>
+           <div *ngIf="f['username'].errors['maxlength']">Username cannot exceed 50 characters</div>
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" formControlName="email" [ngClass]="{ 'is-invalid': submitted && f['email'].errors }" />
+        <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+          <div *ngIf="f['email'].errors['required']">Email is required</div>
+          <div *ngIf="f['email'].errors['email']">Invalid email format</div>
+          <div *ngIf="f['email'].errors['maxlength']">Email cannot exceed 100 characters</div>
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" formControlName="password" [ngClass]="{ 'is-invalid': submitted && f['password'].errors }" />
+        <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+          <div *ngIf="f['password'].errors['required']">Password is required</div>
+          <div *ngIf="f['password'].errors['minlength']">Password must be at least 6 characters</div>
+           <div *ngIf="f['password'].errors['maxlength']">Password cannot exceed 100 characters</div>
+        </div>
+      </div>
+  
+      <div class="form-group button-group">
+        <button type="submit" [disabled]="loading">
+           <app-loading-spinner *ngIf="loading" message=""></app-loading-spinner>
+           <span *ngIf="!loading">Register</span>
+        </button>
+        <a routerLink="/auth/login" class="btn btn-link">Cancel</a>
+      </div>
+    </form>
+  </div>

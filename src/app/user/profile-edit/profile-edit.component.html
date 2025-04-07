@@ -1,0 +1,75 @@
+<!-- src/app/user/profile-edit/profile-edit.component.html -->
+<h2>Edit Profile</h2>
+
+<app-loading-spinner *ngIf="loading"></app-loading-spinner>
+<app-error-message [message]="error"></app-error-message>
+<div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+<div *ngIf="!loading && profileForm" class="edit-profile-form">
+
+    <!-- Profile Picture Section -->
+    <div class="form-group profile-picture-section">
+        <label>Profile Picture</label>
+        <img [src]="profilePicturePreview || 'assets/placeholder-profile.png'" alt="Profile picture preview" class="picture-preview">
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/jpeg">
+        <button type="button" (click)="fileInput.click()" [disabled]="saving">Change Picture</button>
+        <button type="button" *ngIf="profilePicturePreview && !isDefaultPlaceholder" (click)="deleteProfilePicture()" [disabled]="saving || deletingPicture" class="delete-picture-button">
+             <span *ngIf="!deletingPicture">Delete Picture</span>
+             <span *ngIf="deletingPicture">Deleting...</span>
+        </button>
+         <app-error-message [message]="pictureError"></app-error-message>
+    </div>
+
+
+    <!-- Profile Details Form -->
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" formControlName="username" [ngClass]="{ 'is-invalid': submitted && f['username'].errors }">
+             <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">
+                <div *ngIf="f['username'].errors['required']">Username is required</div>
+                 <div *ngIf="f['username'].errors['minlength']">Username must be at least 3 characters</div>
+                 <div *ngIf="f['username'].errors['maxlength']">Username cannot exceed 50 characters</div>
+             </div>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" formControlName="email" [ngClass]="{ 'is-invalid': submitted && f['email'].errors }">
+            <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+                <div *ngIf="f['email'].errors['required']">Email is required</div>
+                <div *ngIf="f['email'].errors['email']">Invalid email format</div>
+                <div *ngIf="f['email'].errors['maxlength']">Email cannot exceed 100 characters</div>
+            </div>
+        </div>
+
+        <!-- Add other editable fields like bio etc. if needed -->
+
+        <div class="form-group privacy-setting">
+            <label>Account Privacy</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" formControlName="isPrivate" [value]="false"> Public
+                </label>
+                <label>
+                    <input type="radio" formControlName="isPrivate" [value]="true"> Private
+                </label>
+            </div>
+            <button type="button" (click)="updatePrivacy()" [disabled]="savingPrivacy || profileForm.get('isPrivate')?.value === initialPrivacyValue">
+                 <span *ngIf="!savingPrivacy">Save Privacy Setting</span>
+                 <span *ngIf="savingPrivacy">Saving...</span>
+            </button>
+             <app-error-message [message]="privacyError"></app-error-message>
+        </div>
+
+
+        <div class="form-group button-group">
+            <button type="submit" [disabled]="saving || !profileForm.dirty">
+                 <span *ngIf="!saving">Save Profile Changes</span>
+                 <span *ngIf="saving">Saving...</span>
+            </button>
+            <button type="button" class="cancel-button" (click)="cancel()">Cancel</button>
+        </div>
+    </form>
+</div>

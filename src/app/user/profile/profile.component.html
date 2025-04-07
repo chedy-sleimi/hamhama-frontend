@@ -1,0 +1,41 @@
+<!-- src/app/user/profile/profile.component.html -->
+<app-loading-spinner *ngIf="loading"></app-loading-spinner>
+<app-error-message [message]="error"></app-error-message>
+
+<div *ngIf="profile && !loading && !error" class="profile-container">
+  <div class="profile-header">
+    <img [src]="getImageUrl(profile.profilePictureUrl)" alt="{{ profile.username }}'s profile picture" class="profile-picture">
+    <div class="profile-info">
+      <h2>{{ profile.username }}</h2>
+      <!-- Only show email for own profile maybe? -->
+      <p *ngIf="isOwnProfile">{{ profile.email }}</p>
+      <p>{{ profile.followersCount }} Followers | {{ profile.followingCount }} Following</p>
+       <p *ngIf="profile.isPrivate" class="privacy-status"><i class="fas fa-lock"></i> Private Account</p> <!-- Use FontAwesome or similar -->
+    </div>
+    <div class="profile-actions">
+       <ng-container *ngIf="isAuthenticated && !isOwnProfile">
+           <button *ngIf="!isFollowing" (click)="follow()" [disabled]="actionLoading">Follow</button>
+           <button *ngIf="isFollowing" (click)="unfollow()" [disabled]="actionLoading">Unfollow</button>
+           <button *ngIf="!isBlocked" (click)="block()" [disabled]="actionLoading" class="block-button">Block</button>
+           <button *ngIf="isBlocked" (click)="unblock()" [disabled]="actionLoading" class="unblock-button">Unblock</button>
+       </ng-container>
+       <a *ngIf="isOwnProfile" routerLink="/users/profile/edit" class="edit-profile-button">Edit Profile</a>
+    </div>
+  </div>
+
+   <app-error-message [message]="actionError" class="action-error"></app-error-message>
+
+
+  <!-- Tabs for Liked Recipes, User's Recipes etc. -->
+  <div class="profile-content">
+    <h3>Liked Recipes</h3>
+    <div class="recipe-grid profile-recipe-grid" *ngIf="likedRecipes && likedRecipes.length > 0">
+        <!-- Use recipe-card -->
+        <app-recipe-card *ngFor="let recipe of likedRecipes" [recipe]="recipe"></app-recipe-card>
+    </div>
+     <p *ngIf="!likedRecipes || likedRecipes.length === 0">This user hasn't liked any recipes yet.</p>
+
+     <!-- Add section for user's own recipes if needed -->
+  </div>
+
+</div>
