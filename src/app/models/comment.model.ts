@@ -1,8 +1,10 @@
+// src/app/models/comment.model.ts
 export interface Comment {
-    id: number;
-    content: string;
-    timestamp: string; // Comes as string, might need Date conversion
-    userId?: number;
-    username?: string; // Add this for display convenience
-    recipeId: number;
-  }
+  id: number;
+  content: string;
+  timestamp: string;
+  userId?: number | null;
+  username?: string;
+  recipeId: number;
+  authorProfilePictureUrl?: string | null; // <-- Add this
+}

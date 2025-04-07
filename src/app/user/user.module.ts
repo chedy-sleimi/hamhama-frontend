@@ -20,7 +20,7 @@ import { RecipeModule } from '../recipe/recipe.module'; // <--- IMPORT RecipeMod
   imports: [
     SharedModule,
     UserRoutingModule,
-    RecipeModule // <--- ADD RecipeModule HERE
+    RecipeModule
   ],
   providers: [
       UserService

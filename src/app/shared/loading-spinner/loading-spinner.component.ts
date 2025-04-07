@@ -5,7 +5,6 @@ import { Component, Input } from '@angular/core';
   selector: 'app-loading-spinner',
   templateUrl: './loading-spinner.component.html',
   standalone: false,
-  styleUrls: ['./loading-spinner.component.scss']
 })
 export class LoadingSpinnerComponent {
   @Input() message: string = 'Loading...';

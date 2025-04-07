@@ -1,37 +1,94 @@
 <!-- src/app/recipe/comment-section/comment-section.component.html -->
-<div class="comment-section">
-    <h4>Comments ({{ comments.length }})</h4>
-    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
-    <app-error-message [message]="error"></app-error-message>
-  
-    <!-- Add Comment Form (only if authenticated) -->
-     <div *ngIf="isAuthenticated" class="comment-form">
-         <textarea [(ngModel)]="newCommentContent" placeholder="Add your comment..." rows="3"></textarea>
-         <button (click)="addComment()" [disabled]="!newCommentContent || submittingComment">
-             {{ submittingComment ? 'Submitting...' : 'Add Comment' }}
-         </button>
-          <app-error-message [message]="submitError"></app-error-message>
-     </div>
-     <p *ngIf="!isAuthenticated"><a routerLink="/auth/login">Log in</a> to add comments.</p>
-  
-  
-    <ul class="comment-list" *ngIf="!loading && comments.length > 0">
-      <li *ngFor="let comment of comments" class="comment-item">
-        <p class="comment-content">{{ comment.content }}</p>
-        <div class="comment-meta">
-          <span class="comment-author">By: {{ comment.username || 'Unknown User' }}</span>
-          <span class="comment-timestamp">{{ comment.timestamp | date:'short' }}</span>
-          <!-- Add delete button if owner or admin -->
-          <button
-              *ngIf="isOwnerOrAdmin(comment.userId)"
-              class="delete-comment-button"
-              (click)="deleteComment(comment.id)"
-              [disabled]="deletingCommentId === comment.id">
-                  <span *ngIf="deletingCommentId !== comment.id">Delete</span>
-                  <span *ngIf="deletingCommentId === comment.id">...</span>
-          </button>
-        </div>
-      </li>
-    </ul>
-    <p *ngIf="!loading && comments.length === 0 && !error">No comments yet.</p>
+<div class="comment-section space-y-6">
+  <h4 class="text-xl font-semibold text-gray-800">Comments ({{ comments.length }})</h4>
+
+  <!-- Display loading/error messages -->
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+  <app-error-message [message]="error"></app-error-message>
+  <app-error-message [message]="deleteError"></app-error-message>
+
+  <!-- Add Comment Form (structure remains the same) -->
+  <div *ngIf="isAuthenticated" class="comment-form bg-gray-50 p-4 rounded-md border border-gray-200">
+     <!-- ... form content ... -->
+      <label for="comment-content" class="sr-only">Add your comment</label>
+      <textarea id="comment-content" [(ngModel)]="newCommentContent" placeholder="Add your comment..." rows="3" required
+                class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out"
+                [disabled]="submittingComment"></textarea>
+      <div class="mt-3 flex justify-between items-center">
+        <app-error-message [message]="submitError" class="flex-grow mr-4"></app-error-message>
+        <button (click)="addComment()" [disabled]="!newCommentContent.trim() || submittingComment" type="button"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out">
+          <svg *ngIf="submittingComment" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          {{ submittingComment ? 'Submitting...' : 'Add Comment' }}
+        </button>
+      </div>
   </div>
+  <p *ngIf="!isAuthenticated" class="text-sm text-gray-500"><a routerLink="/auth/login" class="text-indigo-600 hover:underline">Log in</a> to add comments.</p>
+
+
+  <!-- Comment List -->
+  <ul class="comment-list space-y-4" *ngIf="!loading && comments.length > 0">
+    <li *ngFor="let comment of comments" class="comment-item flex space-x-3 bg-white p-4 rounded-md shadow-sm border border-gray-200">
+      <!-- Profile Picture Area -->
+      <div class="flex-shrink-0 h-10 w-10">
+
+        <!-- Step 1: Use ng-container to get the potential URL and assign to imageUrl -->
+        <ng-container *ngIf="getProfilePictureUrl(comment) as imageUrl">
+            <!-- Step 2: Nest another ng-container to check the error state -->
+            <ng-container *ngIf="!imageErrorStates[comment.id]">
+                 <!-- Render the image only if URL exists AND no error -->
+                 <img [src]="imageUrl"
+                      (error)="handleImageError(comment.id)"
+                      alt="{{ comment.username || 'User' }}'s profile picture"
+                      class="h-10 w-10 rounded-full object-cover bg-gray-200 border border-gray-300">
+            </ng-container>
+        </ng-container>
+
+         <!-- Show SVG Placeholder IF no URL OR image has errored -->
+         <ng-container *ngIf="!getProfilePictureUrl(comment) || imageErrorStates[comment.id]">
+            <svg class="h-10 w-10 rounded-full text-gray-400 bg-gray-200 border border-gray-300" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg> <!-- SVG placeholder -->
+         </ng-container>
+      </div>
+
+      <!-- Comment Content & Meta (remains the same) -->
+      <div class="flex-grow">
+        <!-- Display Mode -->
+        <div *ngIf="editingCommentId !== comment.id">
+           <p class="comment-content text-gray-800 text-sm mb-1 whitespace-pre-wrap break-words">{{ comment.content }}</p>
+           <div class="comment-meta flex flex-wrap justify-between items-center text-xs text-gray-500 gap-x-2">
+             <div class="flex-shrink-0">
+               <span class="comment-author font-medium text-gray-700">{{ comment.username || 'Unknown User' }}</span>
+               <span class="mx-1">·</span>
+               <span class="comment-timestamp">{{ comment.timestamp | date:'short' }}</span>
+             </div>
+              <div class="flex space-x-2 items-center flex-shrink-0">
+                 <button *ngIf="isOwner(comment.userId)" (click)="startEdit(comment)" type="button" title="Edit Comment" class="text-indigo-600 hover:text-indigo-800 focus:outline-none font-medium">Edit</button>
+                 <button *ngIf="canDelete(comment.userId)" (click)="deleteComment(comment.id)" [disabled]="deletingCommentId === comment.id" type="button" title="Delete Comment" class="text-red-600 hover:text-red-800 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed font-medium">
+                     <svg *ngIf="deletingCommentId === comment.id" class="animate-spin h-4 w-4 text-red-600 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                     <span *ngIf="deletingCommentId !== comment.id">Delete</span>
+                 </button>
+              </div>
+           </div>
+         </div>
+         <!-- Edit Mode Form (remains the same) -->
+         <div *ngIf="editingCommentId === comment.id" class="space-y-2">
+            <label [attr.for]="'edit-comment-' + comment.id" class="sr-only">Edit comment</label>
+            <textarea [id]="'edit-comment-' + comment.id" [(ngModel)]="editedCommentContent" rows="3" required
+                      class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out"
+                      [disabled]="savingEdit"></textarea>
+            <app-error-message [message]="submitError"></app-error-message>
+            <div class="flex justify-end space-x-2">
+               <button (click)="cancelEdit()" type="button" class="bg-white py-1 px-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Cancel</button>
+               <button (click)="saveEdit()" [disabled]="!editedCommentContent.trim() || savingEdit" type="button" class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out">
+                  <svg *ngIf="savingEdit" class="animate-spin -ml-0.5 mr-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  Save
+               </button>
+            </div>
+         </div>
+      </div> <!-- End flex-grow -->
+    </li>
+  </ul>
+  <p *ngIf="!loading && comments.length === 0 && !error" class="text-center text-gray-500 text-sm py-4">No comments yet.</p>
+</div>

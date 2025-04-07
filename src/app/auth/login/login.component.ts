@@ -9,7 +9,6 @@ import { first } from 'rxjs/operators';
   selector: 'app-login',
   templateUrl: './login.component.html',
   standalone: false,
-  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;

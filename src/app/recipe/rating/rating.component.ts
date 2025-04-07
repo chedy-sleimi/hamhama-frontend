@@ -8,7 +8,6 @@ import { Subject, takeUntil } from 'rxjs';
   selector: 'app-rating',
   standalone: false,
   templateUrl: './rating.component.html',
-  styleUrls: ['./rating.component.scss']
 })
 export class RatingComponent implements OnInit, OnDestroy {
   @Input() recipeId!: number;

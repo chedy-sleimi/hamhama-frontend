@@ -12,7 +12,6 @@ import { environment } from '../../../environments/environment';
   selector: 'app-profile',
   standalone: false,
   templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   profile: UserProfile | null = null;

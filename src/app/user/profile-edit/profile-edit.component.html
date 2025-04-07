@@ -1,75 +1,135 @@
-<!-- src/app/user/profile-edit/profile-edit.component.html -->
-<h2>Edit Profile</h2>
-
-<app-loading-spinner *ngIf="loading"></app-loading-spinner>
-<app-error-message [message]="error"></app-error-message>
-<div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
-
-<div *ngIf="!loading && profileForm" class="edit-profile-form">
-
-    <!-- Profile Picture Section -->
-    <div class="form-group profile-picture-section">
-        <label>Profile Picture</label>
-        <img [src]="profilePicturePreview || 'assets/placeholder-profile.png'" alt="Profile picture preview" class="picture-preview">
-        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/jpeg">
-        <button type="button" (click)="fileInput.click()" [disabled]="saving">Change Picture</button>
-        <button type="button" *ngIf="profilePicturePreview && !isDefaultPlaceholder" (click)="deleteProfilePicture()" [disabled]="saving || deletingPicture" class="delete-picture-button">
-             <span *ngIf="!deletingPicture">Delete Picture</span>
-             <span *ngIf="deletingPicture">Deleting...</span>
-        </button>
-         <app-error-message [message]="pictureError"></app-error-message>
+<div class="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">
+      Edit Profile
+    </h2>
+  
+    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+    <app-error-message [message]="error"></app-error-message> <!-- General Load/Save Error -->
+     <div *ngIf="successMessage" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+      <span class="block sm:inline">{{ successMessage }}</span>
     </div>
-
-
-    <!-- Profile Details Form -->
-    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" formControlName="username" [ngClass]="{ 'is-invalid': submitted && f['username'].errors }">
-             <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">
-                <div *ngIf="f['username'].errors['required']">Username is required</div>
-                 <div *ngIf="f['username'].errors['minlength']">Username must be at least 3 characters</div>
-                 <div *ngIf="f['username'].errors['maxlength']">Username cannot exceed 50 characters</div>
+  
+    <div *ngIf="!loading && profileForm" class="bg-white p-6 shadow-md rounded-lg space-y-8 divide-y divide-gray-200">
+  
+      <!-- Profile Picture Section -->
+      <div class="space-y-4 sm:flex sm:items-start sm:space-y-0 sm:space-x-6">
+         <label class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 sm:w-1/4"> Profile Picture </label>
+         <div class="sm:w-3/4 sm:flex sm:items-center sm:space-x-4">
+            <img [src]="profilePicturePreview || 'assets/placeholder-profile.png'" alt="Profile picture preview"
+                 class="h-20 w-20 rounded-full object-cover border border-gray-300 flex-shrink-0">
+            <div class="mt-4 sm:mt-0">
+               <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/jpeg" class="hidden">
+               <button type="button" (click)="fileInput.click()" [disabled]="saving"
+                       class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
+                 Change
+               </button>
+               <button type="button" *ngIf="profilePicturePreview && !isDefaultPlaceholder" (click)="deleteProfilePicture()" [disabled]="saving || deletingPicture"
+                       class="ml-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50">
+                  <svg *ngIf="deletingPicture" class="animate-spin -ml-0.5 mr-1 h-3 w-3 text-red-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                 {{ deletingPicture ? 'Deleting...' : 'Remove' }}
+               </button>
+               <p class="mt-1 text-xs text-gray-500">JPG only, max 5MB.</p>
+               <app-error-message [message]="pictureError"></app-error-message>
+            </div>
+         </div>
+      </div>
+  
+  
+      <!-- Profile Details Form -->
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="pt-8 space-y-6">
+  
+          <!-- Username -->
+          <div class="sm:grid sm:grid-cols-4 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+             <label for="username" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Username </label>
+             <div class="mt-1 sm:mt-0 sm:col-span-3">
+               <input type="text" id="username" formControlName="username" required
+                      class="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"
+                      [ngClass]="{ 'border-red-500': submitted && f['username'].errors }">
+                <div *ngIf="submitted && f['username'].errors" class="text-red-600 text-xs mt-1">
+                   <div *ngIf="f['username'].errors['required']">Username is required</div>
+                   <div *ngIf="f['username'].errors['minlength']">Must be at least 3 characters</div>
+                   <div *ngIf="f['username'].errors['maxlength']">Cannot exceed 50 characters</div>
+                </div>
              </div>
-        </div>
-
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" formControlName="email" [ngClass]="{ 'is-invalid': submitted && f['email'].errors }">
-            <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
-                <div *ngIf="f['email'].errors['required']">Email is required</div>
-                <div *ngIf="f['email'].errors['email']">Invalid email format</div>
-                <div *ngIf="f['email'].errors['maxlength']">Email cannot exceed 100 characters</div>
-            </div>
-        </div>
-
-        <!-- Add other editable fields like bio etc. if needed -->
-
-        <div class="form-group privacy-setting">
-            <label>Account Privacy</label>
-            <div class="radio-group">
-                <label>
-                    <input type="radio" formControlName="isPrivate" [value]="false"> Public
-                </label>
-                <label>
-                    <input type="radio" formControlName="isPrivate" [value]="true"> Private
-                </label>
-            </div>
-            <button type="button" (click)="updatePrivacy()" [disabled]="savingPrivacy || profileForm.get('isPrivate')?.value === initialPrivacyValue">
-                 <span *ngIf="!savingPrivacy">Save Privacy Setting</span>
-                 <span *ngIf="savingPrivacy">Saving...</span>
-            </button>
-             <app-error-message [message]="privacyError"></app-error-message>
-        </div>
-
-
-        <div class="form-group button-group">
-            <button type="submit" [disabled]="saving || !profileForm.dirty">
-                 <span *ngIf="!saving">Save Profile Changes</span>
-                 <span *ngIf="saving">Saving...</span>
-            </button>
-            <button type="button" class="cancel-button" (click)="cancel()">Cancel</button>
-        </div>
-    </form>
-</div>
+           </div>
+  
+          <!-- Email -->
+          <div class="sm:grid sm:grid-cols-4 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+             <label for="email" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Email </label>
+             <div class="mt-1 sm:mt-0 sm:col-span-3">
+               <input type="email" id="email" formControlName="email" required
+                      class="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"
+                      [ngClass]="{ 'border-red-500': submitted && f['email'].errors }">
+               <div *ngIf="submitted && f['email'].errors" class="text-red-600 text-xs mt-1">
+                   <div *ngIf="f['email'].errors['required']">Email is required</div>
+                   <div *ngIf="f['email'].errors['email']">Invalid email format</div>
+                   <div *ngIf="f['email'].errors['maxlength']">Cannot exceed 100 characters</div>
+               </div>
+             </div>
+           </div>
+  
+          <!-- TODO: Add other editable fields like bio etc. if needed -->
+  
+          <!-- Save Profile Button -->
+           <div class="pt-5 border-t border-gray-200">
+             <div class="flex justify-end">
+               <button type="submit" [disabled]="saving || !profileForm.dirty || profileForm.invalid"
+                       class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <svg *ngIf="saving" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                 Save Profile Changes
+               </button>
+             </div>
+           </div>
+      </form>
+  
+  
+       <!-- Privacy Settings - Separate Section/Form -->
+       <div class="pt-8 space-y-6">
+          <div class="sm:grid sm:grid-cols-4 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+             <label class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"> Account Privacy </label>
+             <div class="mt-1 sm:mt-0 sm:col-span-3">
+               <fieldset class="mt-4">
+                 <legend class="sr-only">Account privacy</legend>
+                 <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                   <div class="flex items-center">
+                     <input id="privacy-public" name="privacy" type="radio" formControlName="isPrivate" [value]="false" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                     <label for="privacy-public" class="ml-3 block text-sm font-medium text-gray-700"> Public </label>
+                   </div>
+                   <div class="flex items-center">
+                     <input id="privacy-private" name="privacy" type="radio" formControlName="isPrivate" [value]="true" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                     <label for="privacy-private" class="ml-3 block text-sm font-medium text-gray-700"> Private </label>
+                   </div>
+                 </div>
+               </fieldset>
+               <app-error-message [message]="privacyError"></app-error-message>
+               <button type="button" (click)="updatePrivacy()" [disabled]="savingPrivacy || profileForm.get('isPrivate')?.value === initialPrivacyValue"
+                        class="mt-4 inline-flex justify-center py-1.5 px-3 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                   <svg *ngIf="savingPrivacy" class="animate-spin -ml-0.5 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                 Save Privacy Setting
+               </button>
+             </div>
+           </div>
+       </div>
+  
+  
+       <!-- Cancel Button Area -->
+       <div class="pt-8">
+           <div class="flex justify-end">
+                <button type="button" (click)="cancel()"
+                      class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                 Back to Profile
+               </button>
+           </div>
+       </div>
+  
+    </div> <!-- End main container -->
+  </div>

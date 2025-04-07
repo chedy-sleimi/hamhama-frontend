@@ -11,7 +11,6 @@ import { Location } from '@angular/common'; // Import Location
   selector: 'app-recipe-form',
   standalone: false,
   templateUrl: './recipe-form.component.html',
-  styleUrls: ['./recipe-form.component.scss']
 })
 export class RecipeFormComponent implements OnInit, OnDestroy {
   recipeForm: FormGroup;

@@ -1,42 +1,69 @@
-<!-- src/app/recipe/recipe-detail/recipe-detail.component.html -->
-<app-loading-spinner *ngIf="loading"></app-loading-spinner>
-<app-error-message [message]="error"></app-error-message>
-
-<div *ngIf="recipe && !loading && !error" class="recipe-detail-container">
-  <div class="recipe-header">
-      <h2>{{ recipe.name }}</h2>
-      <div class="actions" *ngIf="isOwnerOrAdmin$ | async">
-          <button class="edit-button" [routerLink]="['/recipes', 'edit', recipe.id]">Edit</button>
-          <button class="delete-button" (click)="deleteRecipe()" [disabled]="deleting">
-              <span *ngIf="!deleting">Delete</span>
-              <span *ngIf="deleting">Deleting...</span>
-           </button>
+<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+    <app-error-message [message]="error"></app-error-message>
+  
+    <div *ngIf="recipe && !loading && !error" class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <!-- Header Image -->
+      <img [src]="getImageUrl(recipe.imageUrl)" alt="{{ recipe.name }}" class="w-full h-64 md:h-80 object-cover">
+  
+      <div class="p-6 md:p-8">
+        <!-- Recipe Title & Actions -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-4 border-b border-gray-200">
+          <h2 class="text-3xl font-bold text-gray-900 mb-2 sm:mb-0">{{ recipe.name }}</h2>
+          <div class="flex space-x-2 flex-shrink-0" *ngIf="isOwnerOrAdmin$ | async">
+            <button [routerLink]="['/recipes', 'edit', recipe.id]"
+                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-gray-700 bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition ease-in-out duration-150">
+              Edit
+            </button>
+            <button (click)="deleteRecipe()" [disabled]="deleting"
+                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition ease-in-out duration-150">
+              <!-- Simple spinner for delete -->
+               <svg *ngIf="deleting" class="animate-spin -ml-0.5 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              {{ deleting ? 'Deleting...' : 'Delete' }}
+            </button>
+          </div>
+        </div>
+  
+        <!-- Meta Info -->
+        <div class="flex flex-wrap text-sm text-gray-600 mb-6 space-x-4">
+          <span><strong>Category:</strong> {{ recipe.category | titlecase }}</span>
+          <span><strong>By:</strong>
+            <a [routerLink]="['/users', recipe.authorUsername, 'profile']" class="text-indigo-600 hover:text-indigo-800 hover:underline">{{ recipe.authorUsername }}</a>
+          </span>
+        </div>
+  
+        <!-- Description -->
+        <div class="prose prose-indigo max-w-none mb-8"> <!-- Using @tailwindcss/typography for description -->
+           <p>{{ recipe.description }}</p>
+           <!-- If description was HTML/Markdown, wrap with <div [innerHTML]="sanitizedDescription"></div> -->
+        </div>
+  
+        <!-- TODO: Add Ingredients List Here with Tailwind styling -->
+  
+  
+        <!-- Nutrition Section -->
+        <div class="my-8 p-4 border border-gray-200 rounded-md bg-gray-50">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">Nutrition Facts</h3>
+          <button (click)="loadNutrition()" [disabled]="loadingNutrition"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-60 mb-4">
+            {{ nutritionSvg ? 'Reload Nutrition' : 'Load Nutrition' }}
+          </button>
+          <app-loading-spinner *ngIf="loadingNutrition"></app-loading-spinner>
+          <app-error-message [message]="nutritionError"></app-error-message>
+          <!-- Render SVG directly -->
+          <div *ngIf="nutritionSvg" [innerHTML]="sanitizedNutritionSvg" class="max-w-sm mx-auto border border-gray-300 shadow-sm rounded overflow-hidden"></div>
+        </div>
+  
+  
+        <!-- Rating Component -->
+        <app-rating [recipeId]="recipe.id" [initialRating]="recipe.averageRating" class="my-8 block"></app-rating>
+  
+        <!-- Comment Section -->
+        <app-comment-section [recipeId]="recipe.id" class="mt-8 pt-8 border-t border-gray-200 block"></app-comment-section>
+  
       </div>
+    </div>
   </div>
-
-  <p><strong>Category:</strong> {{ recipe.category | titlecase }}</p>
-  <p><strong>By:</strong> <a [routerLink]="['/users', recipe.authorUsername, 'profile']">{{ recipe.authorUsername }}</a></p> <!-- Link to author profile -->
-
-  <img [src]="getImageUrl(recipe.imageUrl)" alt="{{ recipe.name }}" class="recipe-main-image">
-
-  <p class="description">{{ recipe.description }}</p>
-
-  <!-- Add Ingredients List Here if available -->
-
-  <div class="nutrition-section">
-      <h3>Nutrition Facts</h3>
-      <button (click)="loadNutrition()" [disabled]="loadingNutrition">
-          {{ nutritionSvg ? 'Reload' : 'Load' }} Nutrition
-      </button>
-      <app-loading-spinner *ngIf="loadingNutrition"></app-loading-spinner>
-      <app-error-message [message]="nutritionError"></app-error-message>
-      <!-- Render SVG directly -->
-      <div *ngIf="nutritionSvg" [innerHTML]="sanitizedNutritionSvg"></div>
-  </div>
-
-
-  <app-rating [recipeId]="recipe.id" [initialRating]="recipe.averageRating"></app-rating>
-
-  <app-comment-section [recipeId]="recipe.id"></app-comment-section>
-
-</div>

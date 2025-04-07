@@ -1,16 +1,15 @@
-<!-- src/app/recipe/recipe-card/recipe-card.component.html -->
-<div class="recipe-card" *ngIf="recipe">
-    <a [routerLink]="['/recipes', recipe.id]">
-      <img [src]="getImageUrl(recipe.imageUrl)" alt="{{ recipe.name }}" class="recipe-image">
-      <div class="card-content">
-        <h3>{{ recipe.name }}</h3>
-        <p class="category">{{ recipe.category | titlecase }}</p>
-        <p class="author">By: {{ recipe.authorUsername }}</p>
-        <div class="rating">
-          <!-- Basic star display - could use a library -->
-          <span>Avg Rating: {{ recipe.averageRating | number:'1.1-1' }} / 5</span>
-           <!-- Add actual stars later -->
-        </div>
+<div *ngIf="recipe" class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 ease-in-out flex flex-col group">
+  <a [routerLink]="['/recipes', recipe.id]" class="flex flex-col h-full">
+    <img [src]="getImageUrl(recipe.imageUrl)" alt="{{ recipe.name }}" class="w-full h-48 object-cover">
+    <div class="p-4 flex flex-col flex-grow">
+      <h3 class="text-lg font-semibold text-gray-800 mb-1 truncate group-hover:text-indigo-600 transition-colors duration-200">{{ recipe.name }}</h3>
+      <p class="text-xs text-gray-500 uppercase font-medium mb-2">{{ recipe.category | titlecase }}</p>
+      <p class="text-sm text-gray-600 mb-3">By: {{ recipe.authorUsername }}</p>
+      <div class="mt-auto text-sm text-yellow-500 flex items-center">
+        <!-- Basic star display - Replace with actual star icons later -->
+        <svg class="w-4 h-4 fill-current mr-1" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+        <span>{{ recipe.averageRating | number:'1.1-1' }} / 5</span>
       </div>
-    </a>
-  </div>
+    </div>
+  </a>
+</div>

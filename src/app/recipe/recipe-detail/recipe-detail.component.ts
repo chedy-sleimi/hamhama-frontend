@@ -12,7 +12,6 @@ import { environment } from '../../../environments/environment';
   selector: 'app-recipe-detail',
   standalone: false,
   templateUrl: './recipe-detail.component.html',
-  styleUrls: ['./recipe-detail.component.scss']
 })
 export class RecipeDetailComponent implements OnInit, OnDestroy {
   recipe: Recipe | null = null;

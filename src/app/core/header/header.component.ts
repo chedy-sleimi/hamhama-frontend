@@ -1,17 +1,17 @@
-// src/app/core/header/header.component.ts
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Observable, map } from 'rxjs';
 
 @Component({
   selector: 'app-header',
-  standalone: false,
+  standalone: false, // Keep if not using standalone components feature widely
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+  // No styleUrl needed anymore
 })
 export class HeaderComponent implements OnInit {
   currentUser$: Observable<any>; // Adjust type if UserInfo is defined
   isAdmin$: Observable<boolean>;
+  mobileMenuOpen = false; // For mobile menu toggle
 
   constructor(private authService: AuthService) {
     this.currentUser$ = this.authService.currentUser;

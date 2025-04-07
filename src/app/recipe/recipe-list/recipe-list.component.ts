@@ -8,7 +8,6 @@ import { Observable, catchError, of, tap } from 'rxjs';
   selector: 'app-recipe-list',
   templateUrl: './recipe-list.component.html',
   standalone: false,
-  styleUrls: ['./recipe-list.component.scss']
 })
 export class RecipeListComponent implements OnInit {
   recipes: Recipe[] = [];

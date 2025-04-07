@@ -13,7 +13,6 @@ import { environment } from '../../../environments/environment';
   selector: 'app-profile-edit',
   standalone: false,
   templateUrl: './profile-edit.component.html',
-  styleUrls: ['./profile-edit.component.scss']
 })
 export class ProfileEditComponent implements OnInit, OnDestroy {
   profileForm!: FormGroup; // Initialize in ngOnInit after fetching data

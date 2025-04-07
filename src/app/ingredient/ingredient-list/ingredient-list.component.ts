@@ -9,7 +9,6 @@ import { Subject, takeUntil, catchError, of, tap, finalize } from 'rxjs';
   selector: 'app-ingredient-list',
   standalone: false,
   templateUrl: './ingredient-list.component.html',
-  styleUrls: ['./ingredient-list.component.scss']
 })
 export class IngredientListComponent implements OnInit, OnDestroy {
   ingredients: Ingredient[] = [];

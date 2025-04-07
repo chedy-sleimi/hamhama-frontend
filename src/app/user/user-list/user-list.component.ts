@@ -8,7 +8,6 @@ import { Subject, takeUntil, catchError, of, tap } from 'rxjs';
   selector: 'app-user-list',
   standalone: false,
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.scss']
 })
 export class UserListComponent implements OnInit, OnDestroy {
   users: User[] = [];

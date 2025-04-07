@@ -1,33 +1,105 @@
-<!-- src/app/core/header/header.component.html -->
-<header class="main-header">
-    <nav class="container">
-      <a routerLink="/" class="logo">Hamhama</a>
-      <ul class="nav-links">
-        <li><a routerLink="/recipes" routerLinkActive="active">Recipes</a></li>
-  
-        <!-- Authenticated User Links -->
-        <ng-container *ngIf="currentUser$ | async as user">
-           <li><a routerLink="/recipes/new" routerLinkActive="active">New Recipe</a></li>
-           <li><a [routerLink]="['/users', user.username, 'profile']" routerLinkActive="active">My Profile</a></li>
-           <!-- Add more authenticated links -->
+<header class="bg-gray-800 text-white shadow-md">
+   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="flex items-center justify-between h-16">
+       <!-- Logo Section -->
+       <div class="flex-shrink-0">
+         <a routerLink="/" class="text-2xl font-bold text-white hover:text-gray-200">Hamhama</a>
+       </div>
+ 
+       <!-- Navigation Links -->
+       <div class="hidden md:block">
+         <ul class="ml-10 flex items-baseline space-x-4">
+           <li><a routerLink="/recipes" routerLinkActive="bg-gray-900 text-white"
+                  [routerLinkActiveOptions]="{exact: true}"
+                  class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Recipes</a></li>
+ 
+           <!-- Authenticated User Links -->
+           <ng-container *ngIf="currentUser$ | async as user">
+              <li><a routerLink="/recipes/new" routerLinkActive="bg-gray-900 text-white"
+                     class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">New Recipe</a></li>
+              <li><a [routerLink]="['/users', user.username, 'profile']" routerLinkActive="bg-gray-900 text-white"
+                     class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">My Profile</a></li>
+           </ng-container>
+ 
+           <!-- Admin Links -->
+           <ng-container *ngIf="(currentUser$ | async) && (isAdmin$ | async)">
+              <li><a routerLink="/users" routerLinkActive="bg-gray-900 text-white"
+                    [routerLinkActiveOptions]="{exact: true}"
+                    class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Manage Users</a></li>
+              <li><a routerLink="/ingredients" routerLinkActive="bg-gray-900 text-white"
+                     class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Manage Ingredients</a></li>
+           </ng-container>
+         </ul>
+       </div>
+ 
+       <!-- Auth Actions & Mobile Menu Button -->
+       <div class="flex items-center">
+           <!-- Auth Actions (Desktop) -->
+           <div class="hidden md:block">
+               <div class="ml-4 flex items-center md:ml-6">
+                  <ng-container *ngIf="currentUser$ | async as user; else loggedOutDesktop">
+                      <span class="text-gray-300 text-sm font-medium mr-3">Welcome, {{ user.username }}!</span>
+                      <button (click)="logout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition duration-150 ease-in-out">Logout</button>
+                  </ng-container>
+                  <ng-template #loggedOutDesktop>
+                      <a routerLink="/auth/login" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                      <a routerLink="/auth/register" class="ml-4 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition duration-150 ease-in-out">Register</a>
+                  </ng-template>
+               </div>
+           </div>
+ 
+            <!-- Mobile menu button -->
+           <div class="-mr-2 flex md:hidden">
+             <button type="button" (click)="mobileMenuOpen = !mobileMenuOpen" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+               <span class="sr-only">Open main menu</span>
+               <!-- Heroicon name: outline/menu -->
+               <svg *ngIf="!mobileMenuOpen" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+               </svg>
+               <!-- Heroicon name: outline/x -->
+               <svg *ngIf="mobileMenuOpen" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+               </svg>
+             </button>
+           </div>
+       </div>
+ 
+     </div>
+   </nav>
+ 
+   <!-- Mobile menu, show/hide based on menu state. -->
+   <div class="md:hidden" id="mobile-menu" *ngIf="mobileMenuOpen">
+     <ul class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <li><a routerLink="/recipes" routerLinkActive="bg-gray-900 text-white" [routerLinkActiveOptions]="{exact: true}" (click)="mobileMenuOpen=false"
+               class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Recipes</a></li>
+ 
+       <!-- Authenticated User Links -->
+       <ng-container *ngIf="currentUser$ | async as user">
+          <li><a routerLink="/recipes/new" routerLinkActive="bg-gray-900 text-white" (click)="mobileMenuOpen=false"
+                 class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">New Recipe</a></li>
+          <li><a [routerLink]="['/users', user.username, 'profile']" routerLinkActive="bg-gray-900 text-white" (click)="mobileMenuOpen=false"
+                 class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">My Profile</a></li>
+       </ng-container>
+ 
+       <!-- Admin Links -->
+       <ng-container *ngIf="(currentUser$ | async) && (isAdmin$ | async)">
+          <li><a routerLink="/users" routerLinkActive="bg-gray-900 text-white" [routerLinkActiveOptions]="{exact: true}" (click)="mobileMenuOpen=false"
+                 class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Manage Users</a></li>
+          <li><a routerLink="/ingredients" routerLinkActive="bg-gray-900 text-white" (click)="mobileMenuOpen=false"
+                 class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Manage Ingredients</a></li>
+       </ng-container>
+ 
+        <!-- Auth Actions (Mobile) -->
+        <ng-container *ngIf="currentUser$ | async as user; else loggedOutMobile">
+           <li class="border-t border-gray-700 pt-3">
+              <span class="block px-3 py-2 text-base font-medium text-gray-400">Welcome, {{ user.username }}!</span>
+              <button (click)="logout(); mobileMenuOpen=false;" class="mt-1 block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-400 hover:text-white hover:bg-gray-700">Logout</button>
+           </li>
         </ng-container>
-  
-        <!-- Admin Links -->
-        <ng-container *ngIf="(currentUser$ | async) && (isAdmin$ | async)">
-           <li><a routerLink="/users" routerLinkActive="active">Manage Users</a></li>
-           <li><a routerLink="/ingredients" routerLinkActive="active">Manage Ingredients</a></li>
-        </ng-container>
-      </ul>
-  
-      <div class="auth-actions">
-         <ng-container *ngIf="currentUser$ | async as user; else loggedOut">
-             <span>Welcome, {{ user.username }}!</span>
-             <button (click)="logout()">Logout</button>
-         </ng-container>
-         <ng-template #loggedOut>
-             <a routerLink="/auth/login" class="button-link">Login</a>
-             <a routerLink="/auth/register" class="button-link register-link">Register</a>
-         </ng-template>
-      </div>
-    </nav>
-  </header>
+        <ng-template #loggedOutMobile>
+          <li><a routerLink="/auth/login" (click)="mobileMenuOpen=false" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Login</a></li>
+          <li><a routerLink="/auth/register" (click)="mobileMenuOpen=false" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Register</a></li>
+        </ng-template>
+     </ul>
+   </div>
+ </header>

@@ -3,131 +3,153 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { RecipeService } from '../recipe.service';
 import { AuthService } from '../../core/auth.service';
 import { Comment } from '../../models/comment.model';
-import { Subject, takeUntil, catchError, of, tap } from 'rxjs';
+import { Subject, takeUntil, catchError, of, tap, finalize } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-comment-section',
-  standalone: false,
   templateUrl: './comment-section.component.html',
-  styleUrls: ['./comment-section.component.scss']
+  standalone: false
 })
 export class CommentSectionComponent implements OnInit, OnDestroy {
-  @Input() recipeId!: number; // Assume recipeId is always provided
+  @Input() recipeId!: number;
 
   comments: Comment[] = [];
   loading = true;
   error: string | null = null;
   submitError: string | null = null;
+  deleteError: string | null = null;
 
   newCommentContent = '';
   submittingComment = false;
   isAuthenticated = false;
-  currentUserUsername: string | null = null;
+  currentUserId: number | null = null;
   isAdmin = false;
   deletingCommentId: number | null = null;
 
+  editingCommentId: number | null = null;
+  editedCommentContent: string = '';
+  savingEdit = false;
+
+  // State to track image loading errors per comment
+  imageErrorStates: { [commentId: number]: boolean } = {};
 
   private destroy$ = new Subject<void>();
-   private currentUserSub: any; // To store subscription
+  private currentUserSub: any;
 
   constructor(
     private recipeService: RecipeService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
-    if (!this.recipeId) {
-      this.error = 'Recipe ID is required for comments.';
-      this.loading = false;
-      return;
-    }
-
-    this.currentUserSub = this.authService.currentUser.subscribe(user => {
-        this.isAuthenticated = !!user;
-        this.currentUserUsername = user?.username ?? null;
-        this.isAdmin = this.authService.isAdmin(); // Check admin status
-    });
-
-    this.loadComments();
+    // ... (existing ngOnInit logic is fine) ...
+     if (!this.recipeId) {
+        this.error = 'Recipe ID is required for comments.';
+        this.loading = false;
+        return;
+     }
+     this.currentUserSub = this.authService.currentUser.pipe(takeUntil(this.destroy$)).subscribe(user => {
+       this.isAuthenticated = !!user;
+       this.isAdmin = this.authService.isAdmin();
+       this.currentUserId = user?.id ?? null;
+        if (this.isAuthenticated && this.currentUserId === null) {
+          console.error("Authenticated user ID could not be determined. Comment owner checks will fail.");
+        }
+     });
+     this.loadComments();
   }
 
   loadComments(): void {
     this.loading = true;
     this.error = null;
+    this.imageErrorStates = {}; // Reset error states when loading new comments
     this.recipeService.getCommentsByRecipe(this.recipeId)
       .pipe(
           takeUntil(this.destroy$),
-           // TODO: If backend doesn't send username, fetch usernames based on userIds here
-          tap(() => this.loading = false),
-          catchError(err => {
-            this.error = `Failed to load comments: ${err.message}`;
-            this.loading = false;
-            return of([]);
-          })
-       )
-      .subscribe(comments => {
-        this.comments = comments;
-      });
-  }
-
-  addComment(): void {
-    if (!this.newCommentContent.trim()) return;
-
-    this.submittingComment = true;
-    this.submitError = null;
-    this.recipeService.addComment(this.recipeId, this.newCommentContent)
-      .pipe(takeUntil(this.destroy$))
+          finalize(() => this.loading = false)
+      )
       .subscribe({
-        next: () => {
-          this.submittingComment = false;
-          this.newCommentContent = ''; // Clear input
-          this.loadComments(); // Refresh comments list
-        },
-        error: (err) => {
-          this.submitError = `Failed to add comment: ${err.message}`;
-          this.submittingComment = false;
-        }
+          next: (comments: Comment[]) => {
+            this.comments = comments;
+          },
+          error: (err) => {
+            this.error = `Failed to load comments: ${err.message}`;
+            console.error(err);
+          }
       });
   }
 
-  isOwnerOrAdmin(commentUserId: number | undefined): boolean {
-    if (!this.isAuthenticated) return false;
-    if (this.isAdmin) return true;
-    // We need user ID from comment for accurate check, backend should provide it
-    // Or compare username if ID isn't available (less reliable)
-    // For now, assuming comment might not have userId directly accessible from list endpoint
-    // This check needs refinement based on actual backend response for GET /comments/recipe/{id}
-    // Placeholder: Allow delete if admin, otherwise needs comment.userId check
-     return false; // Requires backend to send comment.userId or comment.username accurately
-     // If comment had `username`: return this.currentUserUsername === comment.username;
-     // If comment had `userId`: fetch current user ID from authService and compare.
-  }
-
-
-  deleteComment(commentId: number): void {
-    if (!confirm('Are you sure you want to delete this comment?')) return;
-
-    this.deletingCommentId = commentId;
-    this.submitError = null; // Clear previous errors
-    this.recipeService.deleteComment(commentId)
-        .pipe(takeUntil(this.destroy$))
+  // --- Edit/Add/Delete methods are fine as before ---
+  addComment(): void {
+     if (!this.newCommentContent.trim() || this.submittingComment) return;
+     this.submittingComment = true;
+     this.submitError = null;
+     this.recipeService.addComment(this.recipeId, this.newCommentContent)
+       .pipe(takeUntil(this.destroy$), finalize(() => this.submittingComment = false))
+       .subscribe({
+         next: () => { this.newCommentContent = ''; this.loadComments(); },
+         error: (err) => { this.submitError = `Failed to add comment: ${err.message}`; }
+       });
+   }
+   startEdit(comment: Comment): void { /* ... */ this.editingCommentId = comment.id; this.editedCommentContent = comment.content; this.submitError = null; this.deleteError = null; }
+   cancelEdit(): void { /* ... */ this.editingCommentId = null; this.editedCommentContent = ''; this.savingEdit = false; this.submitError = null; }
+   saveEdit(): void {
+     if (!this.editedCommentContent.trim() || !this.editingCommentId || this.savingEdit) return;
+     this.savingEdit = true; this.submitError = null;
+     this.recipeService.updateComment(this.editingCommentId, this.editedCommentContent)
+        .pipe(takeUntil(this.destroy$), finalize(() => this.savingEdit = false))
         .subscribe({
-            next: () => {
-                this.deletingCommentId = null;
-                this.loadComments(); // Refresh list
-            },
-            error: (err) => {
-                this.submitError = `Failed to delete comment: ${err.message}`;
-                this.deletingCommentId = null;
-            }
+           next: (updatedComment) => {
+              const index = this.comments.findIndex(c => c.id === updatedComment.id);
+              if (index !== -1) { this.comments[index] = { ...this.comments[index], ...updatedComment }; }
+              else { this.loadComments(); }
+              this.cancelEdit();
+           },
+           error: (err) => { this.submitError = `Failed to update comment: ${err.message}`; }
         });
+    }
+   isOwner(commentUserId: number | undefined | null): boolean { /* ... */ if (!this.isAuthenticated || !commentUserId || !this.currentUserId) return false; return commentUserId === this.currentUserId; }
+   canDelete(commentUserId: number | undefined | null): boolean { /* ... */ if (!this.isAuthenticated) return false; if (this.isAdmin) return true; return this.isOwner(commentUserId); }
+   deleteComment(commentId: number): void {
+     if (!confirm('Are you sure you want to delete this comment?')) return;
+     this.deletingCommentId = commentId; this.deleteError = null; this.submitError = null;
+     this.recipeService.deleteComment(commentId)
+         .pipe(takeUntil(this.destroy$), finalize(() => this.deletingCommentId = null))
+         .subscribe({
+             next: () => { this.comments = this.comments.filter(c => c.id !== commentId); },
+             error: (err) => { this.deleteError = `Failed to delete comment: ${err.message}`; console.error("Delete error:", err); }
+         });
+   }
+   // -----------------------------------------------
+
+
+  // --- Revised Image Handling ---
+  getProfilePictureUrl(comment: Comment): string | null { // Return string URL or null
+    // Only return a URL if the backend provided a non-empty path
+    if (comment.authorProfilePictureUrl && comment.authorProfilePictureUrl.trim() !== '') {
+      const url = comment.authorProfilePictureUrl;
+      // Construct full URL if it's relative (starts with '/')
+      if (url.startsWith('/')) {
+          // Avoid double-prepending if backend already includes it sometimes
+          return url.startsWith(environment.apiUrl) ? url : `${environment.apiUrl}${url}`;
+      }
+      // Assume it's already an absolute URL if not starting with '/'
+      return url;
+    }
+    // Return null if no picture URL was provided by the backend
+    return null;
   }
 
+  // Mark specific image as errored
+  handleImageError(commentId: number): void {
+    console.log(`Image failed to load for comment ${commentId}, showing fallback.`);
+    this.imageErrorStates[commentId] = true;
+  }
+  // -----------------------------
 
   ngOnDestroy(): void {
-    if (this.currentUserSub) {
-       this.currentUserSub.unsubscribe();
-    }
+    if (this.currentUserSub) { this.currentUserSub.unsubscribe(); }
     this.destroy$.next();
     this.destroy$.complete();
   }

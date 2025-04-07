@@ -1,41 +1,84 @@
-<!-- src/app/user/profile/profile.component.html -->
-<app-loading-spinner *ngIf="loading"></app-loading-spinner>
-<app-error-message [message]="error"></app-error-message>
+<div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+  <app-error-message [message]="error"></app-error-message> <!-- Error loading profile -->
 
-<div *ngIf="profile && !loading && !error" class="profile-container">
-  <div class="profile-header">
-    <img [src]="getImageUrl(profile.profilePictureUrl)" alt="{{ profile.username }}'s profile picture" class="profile-picture">
-    <div class="profile-info">
-      <h2>{{ profile.username }}</h2>
-      <!-- Only show email for own profile maybe? -->
-      <p *ngIf="isOwnProfile">{{ profile.email }}</p>
-      <p>{{ profile.followersCount }} Followers | {{ profile.followingCount }} Following</p>
-       <p *ngIf="profile.isPrivate" class="privacy-status"><i class="fas fa-lock"></i> Private Account</p> <!-- Use FontAwesome or similar -->
+  <div *ngIf="profile && !loading && !error">
+    <!-- Profile Header -->
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+      <div class="md:flex p-6 md:p-8 items-start">
+        <!-- Profile Picture -->
+        <img [src]="getImageUrl(profile.profilePictureUrl)" alt="{{ profile.username }}'s profile picture"
+             class="h-24 w-24 md:h-32 md:w-32 rounded-full mx-auto md:mx-0 md:mr-6 flex-shrink-0 object-cover border-4 border-white shadow-md">
+
+        <!-- Profile Info -->
+        <div class="text-center md:text-left mt-4 md:mt-0 flex-grow">
+          <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">{{ profile.username }}</h2>
+           <!-- Privacy Status -->
+           <span *ngIf="profile.isPrivate" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 my-1">
+             <!-- Lock Icon Placeholder -->
+              <svg class="w-3 h-3 mr-1 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+             Private Account
+           </span>
+          <!-- Email (only if own profile) -->
+          <p *ngIf="isOwnProfile" class="text-sm text-gray-500 mt-1">{{ profile.email }}</p>
+          <!-- Stats -->
+          <div class="mt-3 flex justify-center md:justify-start space-x-4 text-sm text-gray-600">
+            <span><strong>{{ profile.followersCount }}</strong> Followers</span>
+            <span><strong>{{ profile.followingCount }}</strong> Following</span>
+          </div>
+        </div>
+
+        <!-- Profile Actions -->
+        <div class="mt-6 md:mt-0 md:ml-6 flex-shrink-0 flex flex-col items-center md:items-end space-y-2">
+           <ng-container *ngIf="isAuthenticated && !isOwnProfile">
+             <!-- Follow/Unfollow Button -->
+             <button *ngIf="!isFollowing" (click)="follow()" [disabled]="actionLoading || isBlocked"
+                     class="w-full md:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+               Follow
+             </button>
+             <button *ngIf="isFollowing" (click)="unfollow()" [disabled]="actionLoading"
+                     class="w-full md:w-auto inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+               Unfollow
+             </button>
+             <!-- Block/Unblock Button -->
+             <button *ngIf="!isBlocked" (click)="block()" [disabled]="actionLoading"
+                     class="w-full md:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed">
+               Block
+             </button>
+             <button *ngIf="isBlocked" (click)="unblock()" [disabled]="actionLoading"
+                     class="w-full md:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed">
+               Unblock
+             </button>
+           </ng-container>
+           <a *ngIf="isOwnProfile" routerLink="/users/profile/edit"
+              class="w-full md:w-auto inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+             Edit Profile
+           </a>
+        </div>
+      </div>
+      <app-error-message [message]="actionError" class="px-6 pb-4 md:px-8 md:pb-6"></app-error-message> <!-- Action error inside card -->
     </div>
-    <div class="profile-actions">
-       <ng-container *ngIf="isAuthenticated && !isOwnProfile">
-           <button *ngIf="!isFollowing" (click)="follow()" [disabled]="actionLoading">Follow</button>
-           <button *ngIf="isFollowing" (click)="unfollow()" [disabled]="actionLoading">Unfollow</button>
-           <button *ngIf="!isBlocked" (click)="block()" [disabled]="actionLoading" class="block-button">Block</button>
-           <button *ngIf="isBlocked" (click)="unblock()" [disabled]="actionLoading" class="unblock-button">Unblock</button>
-       </ng-container>
-       <a *ngIf="isOwnProfile" routerLink="/users/profile/edit" class="edit-profile-button">Edit Profile</a>
+
+
+    <!-- Profile Content (e.g., Liked Recipes) -->
+    <div class="profile-content">
+      <h3 class="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Liked Recipes</h3>
+       <!-- Check for privacy before showing recipes if not own profile -->
+      <div *ngIf="profile.isPrivate && !isOwnProfile" class="text-center py-10 px-4 bg-white rounded-lg shadow-sm border border-gray-200">
+           <p class="text-lg text-gray-500">This account is private.</p>
+           <p class="text-sm text-gray-400">Follow them to see their liked recipes.</p>
+      </div>
+
+      <div *ngIf="!profile.isPrivate || isOwnProfile">
+          <div *ngIf="likedRecipes && likedRecipes.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <app-recipe-card *ngFor="let recipe of likedRecipes" [recipe]="recipe"></app-recipe-card>
+          </div>
+          <div *ngIf="!likedRecipes || likedRecipes.length === 0" class="text-center py-10 px-4 bg-white rounded-lg shadow-sm border border-gray-200">
+             <p class="text-lg text-gray-500">This user hasn't liked any recipes yet.</p>
+          </div>
+      </div>
+
+      <!-- TODO: Add section for user's own recipes if needed -->
     </div>
   </div>
-
-   <app-error-message [message]="actionError" class="action-error"></app-error-message>
-
-
-  <!-- Tabs for Liked Recipes, User's Recipes etc. -->
-  <div class="profile-content">
-    <h3>Liked Recipes</h3>
-    <div class="recipe-grid profile-recipe-grid" *ngIf="likedRecipes && likedRecipes.length > 0">
-        <!-- Use recipe-card -->
-        <app-recipe-card *ngFor="let recipe of likedRecipes" [recipe]="recipe"></app-recipe-card>
-    </div>
-     <p *ngIf="!likedRecipes || likedRecipes.length === 0">This user hasn't liked any recipes yet.</p>
-
-     <!-- Add section for user's own recipes if needed -->
-  </div>
-
 </div>

@@ -9,7 +9,6 @@ import { first } from 'rxjs/operators';
   selector: 'app-register',
   templateUrl: './register.component.html',
   standalone: false,
-  styleUrls: ['./register.component.scss'] // Shared styles or specific ones
 })
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup;

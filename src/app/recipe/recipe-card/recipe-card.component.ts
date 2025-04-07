@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
   selector: 'app-recipe-card',
   templateUrl: './recipe-card.component.html',
   standalone: false,
-  styleUrls: ['./recipe-card.component.scss']
 })
 export class RecipeCardComponent {
   @Input() recipe: Recipe | null = null;

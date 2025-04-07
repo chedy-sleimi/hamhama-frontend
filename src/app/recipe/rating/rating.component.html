@@ -1,25 +1,50 @@
-<!-- src/app/recipe/rating/rating.component.html -->
-<div class="rating-container">
-    <h5>Rating</h5>
-    <div class="current-rating">
-        Average: {{ currentAverageRating | number:'1.1-1' }} / 5
-        <!-- Add visual stars based on currentAverageRating -->
+<div class="bg-gray-50 border border-gray-200 rounded-md p-4">
+    <h5 class="text-base font-semibold text-gray-800 mb-2">Rating</h5>
+    <div class="current-rating text-sm text-gray-600 mb-3">
+      Average: {{ currentAverageRating | number:'1.1-1' }} / 5
+      <!-- Optional: Visual stars for average -->
+      <span class="ml-2 text-yellow-400 flex items-center">
+         <!-- Example static stars for average (needs dynamic logic) -->
+         <!-- <svg *ngFor="let i of [1,2,3,4,5]" class="w-4 h-4 fill-current" [class.text-gray-300]="i > currentAverageRating" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg> -->
+      </span>
     </div>
   
-    <div *ngIf="isAuthenticated" class="user-rating">
-        <span class="rate-label">Your Rating:</span>
-        <span class="stars">
-            <button *ngFor="let star of [1, 2, 3, 4, 5]"
-                    (click)="rate(star)"
-                    [class.selected]="star <= (userRating || 0)"
-                    [disabled]="submittingRating"
-                    title="Rate {{ star }} star{{ star > 1 ? 's' : '' }}">
-                ★
-            </button>
-        </span>
-        <button class="clear-rating" *ngIf="userRating" (click)="clearRating()" [disabled]="submittingRating">Clear</button>
-        <app-error-message [message]="ratingError" class="rating-error"></app-error-message>
-         <!-- Display loading state? -->
+    <div *ngIf="isAuthenticated" class="user-rating space-y-2">
+      <div class="flex items-center space-x-2">
+         <span class="rate-label text-sm font-medium text-gray-700">Your Rating:</span>
+         <span class="stars flex">
+           <button *ngFor="let star of [1, 2, 3, 4, 5]"
+                   (click)="rate(star)"
+                   [disabled]="submittingRating"
+                   [attr.title]="'Rate ' + star + ' star' + (star > 1 ? 's' : '')"
+                   type="button"
+                   class="text-2xl leading-none focus:outline-none transition-colors duration-150 ease-in-out"
+                   [ngClass]="{
+                      'text-yellow-400 hover:text-yellow-500': star <= (userRating || 0),
+                      'text-gray-300 hover:text-yellow-300': star > (userRating || 0),
+                      'cursor-not-allowed opacity-50': submittingRating
+                   }">
+             ★
+           </button>
+         </span>
+         <button type="button" class="text-xs text-gray-500 hover:text-red-600 hover:underline focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                 *ngIf="userRating && userRating > 0"
+                 (click)="clearRating()"
+                 [disabled]="submittingRating">
+           Clear
+         </button>
+      </div>
+      <div *ngIf="submittingRating" class="flex items-center text-sm text-gray-500">
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+         </svg>
+        Submitting...
+      </div>
+      <app-error-message [message]="ratingError"></app-error-message> <!-- Error shown below -->
     </div>
-     <p *ngIf="!isAuthenticated"><a routerLink="/auth/login">Log in</a> to rate.</p>
+  
+    <p *ngIf="!isAuthenticated" class="text-sm text-gray-500 mt-2">
+      <a routerLink="/auth/login" class="text-indigo-600 hover:underline">Log in</a> to rate this recipe.
+    </p>
   </div>
